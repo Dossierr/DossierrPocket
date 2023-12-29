@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
+import ChatInput from './ChatInput'
 
 const Chat = ({ route }) => {
   const { caseId, authToken } = route.params;
   const [chatHistory, setChatHistory] = useState([]);
+
+  const flatListRef = useRef(null);
+
+  const scrollToBottom = () => {
+    flatListRef.current.scrollToEnd({ animated: true });
+  };
 
   useEffect(() => {
     const fetchChatHistory = async () => {
@@ -12,7 +19,7 @@ const Chat = ({ route }) => {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `token ${authToken}`,
+            'Authorization': `${authToken}`,
           },
         });
         const result = await response.json();
@@ -27,13 +34,21 @@ const Chat = ({ route }) => {
       fetchChatHistory();
     }
   }, [caseId, authToken]);
+  
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatHistory]);
+
+  const updateChatHistory = (newMessage) => {
+    setChatHistory((prevChatHistory) => [...prevChatHistory, { content: newMessage, type: 'user' }]);
+  };
 
   const renderChatItem = ({ item }) => {
     console.log('Item:', item); // Log the entire item to see its structure
-  
+
     const isAiMessage = item.type === 'ai';
-    console.log('Is AI Message:', isAiMessage); // Log if it's an AI message
-  
+
     return (
       <View style={[styles.chatContainer, isAiMessage ? styles.aiMessage : styles.userMessage]}>
         <Text style={item.type === 'ai' ? styles.sender : styles.receiver}>{item.type}:</Text>
@@ -43,23 +58,32 @@ const Chat = ({ route }) => {
   };
 
   return (
-    <FlatList
-      style={styles.background}
-      data={chatHistory}
-      keyExtractor={(item, index) => index.toString()}
-      renderItem={renderChatItem}
-    />
+    <>
+      <FlatList
+        ref={flatListRef}
+        onContentSizeChange={scrollToBottom}
+        onLayout={scrollToBottom}
+        style={styles.background}
+        data={chatHistory}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={renderChatItem}
+      />
+
+    <ChatInput 
+      updateChatHistory={updateChatHistory}  // Make sure to include this line
+      authToken={authToken} 
+      caseId={caseId} />
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   background: {
-    backgroundColor: '#2E3842',
+    backgroundColor: '#121826',
     flex: 1,
     width: '100%',
     padding: 20,
     paddingBottom: 30,
-    backgroundColor: '#273132'
   },
   chatContainer: {
     padding: 16,
@@ -99,7 +123,10 @@ const styles = StyleSheet.create({
   messageText: {
     color: '#333',
   },
-  
+  spacingView: {
+    height: 20,
+    paddingTop:30,
+  },
 });
 
 export default Chat;

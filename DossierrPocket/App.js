@@ -5,7 +5,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import ChatHeader from './components/ChatHeader';
 import ChatList from './components/ChatList';
-import ChatScrollView from './components/ChatScrollView';
 import WelcomeScreen from './components/WelcomeScreen';
 import Chat from './components/Chat';
 
