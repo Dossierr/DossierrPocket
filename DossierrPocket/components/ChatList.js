@@ -3,7 +3,6 @@ import { View, FlatList, Text, StyleSheet, TouchableOpacity } from 'react-native
 import moment from 'moment';
 import { fetchCases } from '../api/GetCasesApiCall';
 import { useNavigation } from '@react-navigation/native';
-import Chat from './Chat';
 
 const ChatList = ({ authToken }) => {
   const navigation = useNavigation();

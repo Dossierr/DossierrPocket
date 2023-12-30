@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
-import ChatInput from './ChatInput'
+import ChatInput from './ChatInput';
 
 const Chat = ({ route }) => {
   const { caseId, authToken } = route.params;
   const [chatHistory, setChatHistory] = useState([]);
-
   const flatListRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -15,21 +14,30 @@ const Chat = ({ route }) => {
   useEffect(() => {
     const fetchChatHistory = async () => {
       try {
+        console.log('Case ID:', caseId);
+        console.log('Auth Token:', authToken);
+  
         const response = await fetch(`https://dossierr.com/chat/chat/history/${caseId}`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `${authToken}`,
+            'accept': 'application/json',
+            'Authorization': `token ${authToken}`,
           },
         });
+  
+        if (!response.ok) {
+          console.error('Error making GET request:', response.status);
+          throw new Error('Error making GET request');
+        }
+  
         const result = await response.json();
         setChatHistory(result.chat);
-        console.log('Received chat history: ', result.chat)
+        console.log('Received chat history:', result.chat);
       } catch (error) {
         console.error('Error fetching chat history:', error);
       }
     };
-
+  
     if (caseId && authToken) {
       fetchChatHistory();
     }
@@ -45,7 +53,7 @@ const Chat = ({ route }) => {
   };
 
   const renderChatItem = ({ item }) => {
-    console.log('Item:', item); // Log the entire item to see its structure
+    console.log('Item:', item);
 
     const isAiMessage = item.type === 'ai';
 
@@ -69,10 +77,11 @@ const Chat = ({ route }) => {
         renderItem={renderChatItem}
       />
 
-    <ChatInput 
-      updateChatHistory={updateChatHistory}  // Make sure to include this line
-      authToken={authToken} 
-      caseId={caseId} />
+      <ChatInput 
+        updateChatHistory={updateChatHistory}
+        authToken={authToken} 
+        caseId={caseId}
+      />
     </>
   );
 };
